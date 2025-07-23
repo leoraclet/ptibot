@@ -1,0 +1,8 @@
+services:
+  discord-bot:
+    build: .
+    container_name: discord-bot
+    restart: unless-stopped
+    image: python-discord-bot
+    env_file:
+      - .env
