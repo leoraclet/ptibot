@@ -1,7 +1,7 @@
 import json
 import os
 
-from discord import Guild, Object, TextChannel
+from discord import Guild, Object, TextChannel, VoiceChannel
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -20,7 +20,7 @@ BOT_CHANNEL = Object(1397259312602288208, type=TextChannel)
 CALENDAR_CHANNEL = Object(1058816788328091810, type=TextChannel)
 LOGS_CHANNEL = Object(1397918688249905273, type=TextChannel)
 GITHUB_CHANNEL = Object(1397931684720279624, type=TextChannel)
-EVENTS_CHANNEL = CALENDAR_CHANNEL  # Use the same channel for events
+EVENTS_CHANNEL = Object(1398033188454138127, type=VoiceChannel)
 
 # ============================================ #
 # DISCORD BOT CONFIGURATION

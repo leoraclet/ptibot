@@ -101,7 +101,7 @@ def create_or_update_discord_event(event, discord_event_id=None):
     }
 
     response = method(url, json=data, headers=headers)
-    time.sleep(2)  # Pause to respect rate limits
+    time.sleep(1)  # Pause to respect rate limits
     if response.status_code in (200, 201):
         action = "updated" if discord_event_id else "created"
         logger.info(f"Event {event['summary']} {action} on Discord")
@@ -131,7 +131,9 @@ class Calendar(commands.Cog, name="calendar"):
         self.bot = bot
         self.synced_events = ConfigManager.get("synced_events", {"events": []})
 
-    @logger.catch
+        # Start the periodic synchronization loop
+        self.sync_events_loop.start()
+
     @tasks.loop(seconds=SYNC_INTERVAL)
     async def sync_events_loop(self):
         """
@@ -146,7 +148,6 @@ class Calendar(commands.Cog, name="calendar"):
             discord_event_ids = {event["id"] for event in discord_events}
 
             for event in events:
-                time.sleep(2)  # Pause to respect rate limits
                 event_id = event["id"]
                 event_data = {
                     "date": event["start"].get("dateTime", event["start"].get("date")),

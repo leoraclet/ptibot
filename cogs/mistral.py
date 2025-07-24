@@ -1,12 +1,12 @@
 import contextlib
+import os
 import re
 from collections import defaultdict
 
 from discord import Message, NotFound
 from discord.ext import commands
 from loguru import logger
-
-from .api.api import MistralAI
+from mistralai import Mistral as MistralChat
 
 
 def divide_msg(content):
@@ -24,7 +24,7 @@ def divide_msg(content):
     return parts
 
 
-class Mistral(commands.Cog):
+class Mistral(commands.Cog, name="mistral"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.conversations = defaultdict(list)
@@ -32,12 +32,11 @@ class Mistral(commands.Cog):
     @logger.catch
     @commands.Cog.listener()
     async def on_message(self, message: Message):
-
-        logger.debug(f"Received message: {message.content} from {message.author}")
+        logger.info(f"Received message: {message.content} from {message.author}")
         if message.author.bot:
             return
 
-        logger.debug(f"Processing message in channel {message.channel.id}")
+        logger.info(f"Processing message in channel {message.channel.id}")
         channel_id = message.channel.id
         ref = message.reference
         replied_message = None
@@ -52,11 +51,12 @@ class Mistral(commands.Cog):
             or "ptibot" in msg
             or f"<@{self.bot.user.id}>" in msg
         ):
-            logger.debug("Message is a reply to the bot or mentions the bot.")
+            logger.info("Message is a reply to the bot or mentions the bot.")
             new = {
                 "role": "user",
                 "content": re.sub(r"<@1397118403004731514>|ptibot", "", message.content),
             }
+
             if channel_id in self.conversations:
                 self.conversations[channel_id].append(new)
             else:
@@ -68,13 +68,22 @@ class Mistral(commands.Cog):
                 conversation = conversation[-10:]
             async with message.channel.typing():
                 try:
-                    answer = await MistralAI.chat_completion(
-                        messages=conversation, model="codestral-latest"
-                    )
+                    async with MistralChat(
+                        api_key=os.getenv("MISTRAL_API_KEY", ""),
+                    ) as mistral:
+                        answer = await mistral.chat.complete_async(
+                            model="codestral-latest",
+                            messages=conversation,
+                            stream=False,
+                        )
+                        answer = re.sub(
+                            r"<@&?\d+>|@everyone|@here", "X", answer.choices[0].message.content
+                        )
                     conversation.append({"role": "assistant", "content": answer})
                     for part in divide_msg(answer):
                         await message.reply(part)
                 except Exception as e:
+                    raise e
                     await message.reply(str(e))
             return
 

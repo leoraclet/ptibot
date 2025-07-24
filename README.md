@@ -27,6 +27,7 @@
 - [🗂️ Structure](#️-structure)
 - [📦 Dependencies](#-dependencies)
 - [🛠️ Setup](#️-setup)
+  - [📆 Google Calendar](#-google-calendar)
 - [🚀 Run](#-run)
   - [🏠 System](#-system)
   - [🐳 Using Docker](#-using-docker)
@@ -49,16 +50,19 @@ Whether you're running a small community or developing a personal assistant, Pti
 
 - 📖 **Well-Documented**: Source files include thorough comments and, where applicable, links and explanations to clarify key settings.
 
-> [!WARNING]
->
-> Below is a list of features I plan to implement:
-
 **Bot**
-
-- ✅ **Task Management**: Implement functionality to manage tasks (create, delete, mark as completed, etc.).
 
 - ⌚ **Reminders**: Develop reminder handling (create, delete, etc.) with synchronization support for Google Calendar or other calendar services.
 
+- 🤖 **ChatBot**: Implement a Chat Bot functionality by using the Mistral API under the hood.
+
+  > [!WARNING]
+  >
+  > Following is a list of features I **wish** to implement, and therefore, are **not yet features**:
+
+- ✅ **Task Management**: Implement functionality to manage tasks (create, delete, mark as completed, etc.).
+
+- 👣 **Github Tracking**: Develop a tracker to alert of events on repositories of connected account.
 
 ## 🗂️ Structure
 
@@ -73,6 +77,7 @@ Whether you're running a small community or developing a personal assistant, Pti
   - `admin.py` - Admin-related commands and logic.
   - `common.py` - Shared utility functions or commands.
 - [**`db`**](./db/) - Contains the application's local database file.
+- [**`ui`**](./ui/) - Contains custom UI components
 
 **Files**
 
@@ -116,6 +121,11 @@ After completing these steps, fill in the [`.env.template`](./.env.template) fil
 > [!CAUTION]
 >
 > Make sure to rename the file to `.env` so it is properly recognized by the application.
+
+
+### 📆 Google Calendar
+
+To enable synchronization with one of your Google Calendars, please follow this [guide](https://github.com/rempairamore/GCal2Discord/tree/main) and configure the environment variables as specified.
 
 
 ## 🚀 Run
@@ -191,6 +201,7 @@ These projects served as both inspiration and valuable references during the dev
 - [**Deadbeef**](https://github.com/0xf1d0/deadbeef/) – A Discord bot created by a friend for a cybersecurity school server.
 - [**discord-reminder-bot**](https://github.com/TheLovinator1/discord-reminder-bot) – A bot for managing reminders and TODO tasks.
 - [**Python-Discord-Bot-Template**](https://github.com/kkrypt0nn/Python-Discord-Bot-Template) – A helpful template for setting up Discord bots with Python.
+- [**GCal2Discord**](https://github.com/rempairamore/GCal2Discord) - Syncs events from a Google Calendar to a Discord server
 
 
 ## 💡 Tips & Tricks

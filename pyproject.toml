@@ -14,6 +14,7 @@ dependencies = [
     "google-api-python-client>=2.177.0",
     "google-auth>=2.40.3",
     "loguru>=0.7.3",
+    "mistralai[agents]>=1.9.3",
     "peewee>=3.18.2",
     "pip-system-certs>=5.2",
     "pygithub>=2.6.1",

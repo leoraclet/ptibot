@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from dateparser import parse
 from discord import Embed, Interaction, NotFound, app_commands
 from discord.ext import commands, tasks
 
@@ -7,7 +8,6 @@ from config import CALENDAR_CHANNEL, ConfigManager
 
 # TODO: Handle Timezone issues
 # TODO: Add a way to set the timezone for the reminders
-# TODO: Add natural language processing to parse dates and times (with `dateparser` or Mistral)
 
 
 class Reminders(commands.Cog, name="reminders"):
@@ -17,6 +17,16 @@ class Reminders(commands.Cog, name="reminders"):
 
         # Start the reminder check task
         self.check_reminders.start()
+
+    async def course_autocomplete(
+        self, _: Interaction, current: str
+    ) -> list[app_commands.Choice[str]]:
+        courses = [reminder["name"] for reminder in self.reminders]
+        return [
+            app_commands.Choice(name=course, value=course)
+            for course in courses
+            if current.lower() in course.lower()
+        ]
 
     async def event_autocomplete(
         self, interaction: Interaction, current: str
@@ -33,7 +43,7 @@ class Reminders(commands.Cog, name="reminders"):
             if current.lower() in field["name"].lower()
         ]
 
-    @app_commands.command(name="calendar", description="Etablit un rappel pour un événement.")
+    @app_commands.command(name="reminder", description="Etablit un rappel pour un événement.")
     @app_commands.describe(
         course="Choisir le cours.",
         date="Choisir la date de l'événement.",
@@ -47,8 +57,9 @@ class Reminders(commands.Cog, name="reminders"):
             app_commands.Choice(name="remove", value="3"),
         ]
     )
+    @app_commands.autocomplete(course=course_autocomplete)
     @app_commands.autocomplete(event=event_autocomplete)
-    async def calendar_command(
+    async def reminder_command(
         self,
         interaction: Interaction,
         option: app_commands.Choice[str],
@@ -61,7 +72,26 @@ class Reminders(commands.Cog, name="reminders"):
         try:
             if " " not in date:
                 date += " 23:59"
-            reminder_date = datetime.strptime(date, "%d/%m/%Y %H:%M")
+            try:
+                reminder_date = datetime.strptime(date, "%d/%m/%Y %H:%M")
+            except ValueError:
+                reminder_date = parse(
+                    date,
+                    languages=["fr", "en"],
+                    settings={
+                        "RETURN_AS_TIMEZONE_AWARE": False,
+                        "PREFER_DATES_FROM": "future",
+                        "PREFER_DAY_OF_MONTH": "first",
+                        "PREFER_LOCALE_DATE_ORDER": True,
+                        "PREFER_MONTH_OF_YEAR": "current",
+                    },
+                )
+                if reminder_date.hour == 0 and reminder_date.minute == 0:
+                    reminder_date = reminder_date.replace(hour=23, minute=59)
+
+                if not reminder_date:
+                    raise ValueError("Invalid date format") from ValueError
+
             reminder_timestamp = f"<t:{int(reminder_date.timestamp())}:R>"
             calendar_message_id = ConfigManager.get("calendar_message_id", 0)
             calendar_channel = self.bot.get_channel(CALENDAR_CHANNEL.id)
@@ -78,7 +108,7 @@ class Reminders(commands.Cog, name="reminders"):
                         "fields": [
                             {
                                 "name": event,
-                                "date": f"{reminder_date}",
+                                "date": f"{reminder_date.date().__str__()} {reminder_date.time().__str__()[:5]}",
                                 "description": description,
                                 "modality": modality,
                             }
@@ -189,7 +219,9 @@ class Reminders(commands.Cog, name="reminders"):
                                             if existing_reminder["name"] == course:
                                                 for field in existing_reminder["fields"]:
                                                     if field["name"] == event:
-                                                        field["date"] = f"{reminder_date}"
+                                                        field["date"] = (
+                                                            f"{reminder_date.date().__str__()} {reminder_date.time().__str__()[:5]}"
+                                                        )
                                                         field["description"] = description
                                                         field["modality"] = modality
                                                         break
@@ -247,7 +279,7 @@ class Reminders(commands.Cog, name="reminders"):
         calendar_channel = self.bot.get_channel(CALENDAR_CHANNEL.id)
         for reminder in self.reminders:
             for event in reminder["fields"]:
-                event_time = datetime.strptime(event["date"], "%Y-%m-%d %H:%M:%S")
+                event_time = datetime.strptime(event["date"], "%Y-%m-%d %H:%M")
                 if (
                     now + timedelta(hours=1) - timedelta(seconds=30)
                     <= event_time
@@ -255,7 +287,7 @@ class Reminders(commands.Cog, name="reminders"):
                 ):
                     await calendar_channel.send(
                         f":warning: L'échéance *{event['name']}* du cours "
-                        + "**{reminder['name'].upper()}** a lieu dans 1 heure !\n|| @everyone ||",
+                        + f"**{reminder['name'].upper()}** a lieu dans 1 heure !\n|| @everyone ||",
                         delete_after=3600,
                     )
                 elif (
@@ -265,7 +297,7 @@ class Reminders(commands.Cog, name="reminders"):
                 ):
                     await calendar_channel.send(
                         f":warning: L'échéance *{event['name']}* du cours "
-                        + "**{reminder['name'].upper()}** a lieu dans 1 jour !\n|| @everyone ||",
+                        + f"**{reminder['name'].upper()}** a lieu dans 1 jour !\n|| @everyone ||",
                         delete_after=3600,
                     )
                 elif (
@@ -275,13 +307,13 @@ class Reminders(commands.Cog, name="reminders"):
                 ):
                     await calendar_channel.send(
                         f":warning: L'échéance *{event['name']}* du cours "
-                        + "**{reminder['name'].upper()}** a lieu dans 1 semaine !\n|| @everyone ||",
+                        + f"**{reminder['name'].upper()}** a lieu dans 1 semaine !\n|| @everyone ||",
                         delete_after=3600,
                     )
                 elif event_time <= now:
                     await calendar_channel.send(
                         f":warning: L'échéance *{event['name']}* du cours "
-                        + "**{reminder['name'].upper()}** vient d'avoir lieu !\n|| @everyone ||",
+                        + f"**{reminder['name'].upper()}** vient d'avoir lieu !\n|| @everyone ||",
                         delete_after=60,
                     )
                     await self.remove_event(reminder, event, calendar_channel)
