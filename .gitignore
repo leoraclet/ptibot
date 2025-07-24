@@ -1,4 +1,6 @@
 .env
+sqlite3.db
+*.json
 
 # Python-generated files
 __pycache__/

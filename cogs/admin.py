@@ -1,14 +1,17 @@
 import discord
-from discord import app_commands
+from discord import Interaction, app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
+from loguru import logger
+
+from ui.announcement import Announcement
 
 
 class Admin(commands.Cog, name="admin"):
     def __init__(self, bot) -> None:
         self.bot = bot
 
-    @commands.command(
+    @commands.hybrid_command(
         name="sync",
         description="Synchonizes the slash commands.",
     )
@@ -42,7 +45,7 @@ class Admin(commands.Cog, name="admin"):
         embed = discord.Embed(description="The scope must be `global` or `guild`.", color=0xE02B2B)
         await context.send(embed=embed)
 
-    @commands.command(
+    @commands.hybrid_command(
         name="unsync",
         description="Unsynchonizes the slash commands.",
     )
@@ -156,6 +159,9 @@ class Admin(commands.Cog, name="admin"):
 
         :param context: The hybrid command context.
         """
+        logger.info(
+            f"{context.author} (ID: {context.author.id}) has requested the bot to shut down."
+        )
         embed = discord.Embed(description="Shutting down. Bye! :wave:", color=0xBEBEFE)
         await context.send(embed=embed)
         await self.bot.close()
@@ -190,6 +196,22 @@ class Admin(commands.Cog, name="admin"):
         """
         embed = discord.Embed(description=message, color=0xBEBEFE)
         await context.send(embed=embed)
+
+    @app_commands.command(description="Efface un nombre de messages.")
+    @app_commands.describe(message="The number of messages that should be deleted by the bot")
+    @app_commands.checks.has_permissions(manage_messages=True)
+    async def purge(self, interaction: Interaction, limit: int):
+        await interaction.response.send_message(
+            f"{limit} messages ont été effacés.", ephemeral=True
+        )
+        await interaction.channel.purge(limit=limit)
+
+    @app_commands.command(description="Annoncer un message.")
+    @app_commands.describe(message="The message that should Announced by the bot")
+    @commands.is_owner()
+    async def announce(self, interaction: Interaction):
+        modal = Announcement()
+        await interaction.response.send_modal(modal)
 
 
 async def setup(bot) -> None:

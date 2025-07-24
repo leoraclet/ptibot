@@ -1,29 +1,31 @@
 import platform
 
 import discord
-from discord.ext import commands
+from discord import Activity, ActivityType
+from discord.ext import commands, tasks
 from discord.ext.commands import Context
+from loguru import logger
 
 
 class Common(commands.Cog, name="common"):
     def __init__(self, bot) -> None:
         self.bot = bot
+        # Start tasks
+        self.update_status.start()
 
     @commands.hybrid_command(
         name="test",
         description="This is a testing command",
     )
-    async def testcommand(self, context: Context) -> None:
+    async def test_command(self, context: Context) -> None:
         await context.send(
             "This is a test command. It does nothing but "
             + "exists to show how to create a command."
         )
         pass
 
-    @commands.hybrid_command(
-        name="help", description="List all commands the bot has loaded."
-    )
-    async def help(self, context: Context) -> None:
+    @commands.hybrid_command(name="help", description="List all commands the bot has loaded.")
+    async def help_command(self, context: Context) -> None:
         embed = discord.Embed(
             title="Help", description="List of available commands:", color=0xBEBEFE
         )
@@ -37,16 +39,14 @@ class Common(commands.Cog, name="common"):
                 description = command.description.partition("\n")[0]
                 data.append(f"{command.name} - {description}")
             help_text = "\n".join(data)
-            embed.add_field(
-                name=i.capitalize(), value=f"```{help_text}```", inline=False
-            )
+            embed.add_field(name=i.capitalize(), value=f"```{help_text}```", inline=False)
         await context.send(embed=embed)
 
     @commands.hybrid_command(
         name="botinfo",
         description="Get some useful (or not) information about the bot.",
     )
-    async def botinfo(self, context: Context) -> None:
+    async def botinfo_command(self, context: Context) -> None:
         """
         Get some useful (or not) information about the bot.
 
@@ -58,9 +58,7 @@ class Common(commands.Cog, name="common"):
         )
         embed.set_author(name="Bot Information")
         embed.add_field(name="Owner:", value="Neutronys#1700", inline=True)
-        embed.add_field(
-            name="Python Version:", value=f"{platform.python_version()}", inline=True
-        )
+        embed.add_field(name="Python Version:", value=f"{platform.python_version()}", inline=True)
         embed.add_field(
             name="Prefix:",
             value="/ (Slash Commands) or > for normal commands",
@@ -73,7 +71,7 @@ class Common(commands.Cog, name="common"):
         name="serverinfo",
         description="Get some useful (or not) information about the server.",
     )
-    async def serverinfo(self, context: Context) -> None:
+    async def serverinfo_command(self, context: Context) -> None:
         """
         Get some useful (or not) information about the server.
 
@@ -93,9 +91,7 @@ class Common(commands.Cog, name="common"):
             embed.set_thumbnail(url=context.guild.icon.url)
         embed.add_field(name="Server ID", value=context.guild.id)
         embed.add_field(name="Member Count", value=context.guild.member_count)
-        embed.add_field(
-            name="Text/Voice Channels", value=f"{len(context.guild.channels)}"
-        )
+        embed.add_field(name="Text/Voice Channels", value=f"{len(context.guild.channels)}")
         embed.add_field(name=f"Roles ({len(context.guild.roles)})", value=roles)
         embed.set_footer(text=f"Created at: {context.guild.created_at}")
         await context.send(embed=embed)
@@ -104,7 +100,7 @@ class Common(commands.Cog, name="common"):
         name="ping",
         description="Check if the bot is alive.",
     )
-    async def ping(self, context: Context) -> None:
+    async def ping_command(self, context: Context) -> None:
         """
         Check if the bot is alive.
 
@@ -116,6 +112,26 @@ class Common(commands.Cog, name="common"):
             color=0xBEBEFE,
         )
         await context.send(embed=embed)
+
+    @tasks.loop(minutes=1)
+    async def update_status(self) -> None:
+        """Update the bot's status."""
+        guild = self.bot.get_guild(829032123301494834)
+        logger.info(
+            f"Updating status for guild: {guild.name if guild else 'DMs'} "
+            f"with {len(guild.members) if guild else 'unknown'} members."
+        )
+        if guild:
+            await self.bot.change_presence(
+                activity=Activity(
+                    type=ActivityType.watching,
+                    name=f"{len([member for member in guild.members if not member.bot])} members",
+                )
+            )
+
+    @update_status.before_loop
+    async def before_update_status(self):
+        await self.bot.wait_until_ready()
 
 
 async def setup(bot) -> None:

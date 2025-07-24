@@ -2,21 +2,17 @@ import json
 import logging
 import os
 import platform
-import random
 import re
 import sys
 
 import discord
 import requests
-from discord.ext import commands, tasks
+from discord.ext import commands
 from discord.ext.commands import Context
-from dotenv import load_dotenv
 from loguru import logger
 from peewee import Model, SqliteDatabase
 
-# Load environment variables from .env file
-load_dotenv()
-
+from config import DISCORD_BOT_TOKEN, ConfigManager
 
 # ==========================================================
 # Set up logging
@@ -83,7 +79,7 @@ class BaseModel(Model):
 def get_quote():
     response = requests.get("https://zenquotes.io/api/random", timeout=5)
     json_data = json.loads(response.text)
-    quote = json_data[0]["q"] + " -" + json_data[0]["a"]
+    quote = json_data[0]["q"] + " - " + json_data[0]["a"]
     return quote
 
 
@@ -91,12 +87,14 @@ def get_quote():
 # Discord bot class and event handlers
 # ========================================================
 
-intents = discord.Intents.default()
-intents.message_content = True
-
 
 class DiscordBot(commands.Bot):
     def __init__(self) -> None:
+        intents = discord.Intents.default()
+        intents.message_content = True
+        intents.members = True
+        ConfigManager.load()
+
         super().__init__(
             command_prefix=commands.when_mentioned_or(os.getenv("PREFIX")),
             intents=intents,
@@ -112,18 +110,6 @@ class DiscordBot(commands.Bot):
             await message.channel.send(quote)
         else:
             await self.process_commands(message)
-
-    @tasks.loop(seconds=10)  # task runs every +-10 seconds
-    async def random_task(self):
-        self.random_task.change_interval(seconds=10 + random.randint(-10, 10))
-        # print(str(self.random_task.seconds))
-
-        self.counter += 1
-        await self.m_channel.send(self.counter)
-
-    @random_task.before_loop
-    async def before_my_task(self):
-        await self.wait_until_ready()  # wait until the bot logs in
 
     async def on_ready(self):
         logger.info("Bot is ready. Enjoy !!")
@@ -194,9 +180,7 @@ class DiscordBot(commands.Bot):
             )
             await context.send(embed=embed)
         elif isinstance(error, commands.NotOwner):
-            embed = discord.Embed(
-                description="You are not the owner of the bot!", color=0xE02B2B
-            )
+            embed = discord.Embed(description="You are not the owner of the bot!", color=0xE02B2B)
             await context.send(embed=embed)
             if context.guild:
                 logger.warning(
@@ -250,7 +234,11 @@ def main():
 
     # Initialize the bot
     bot = DiscordBot()
-    bot.run(os.getenv("DISCORD_TOKEN"), log_handler=None)
+    bot.run(DISCORD_BOT_TOKEN, log_handler=None)
+
+    # Save the configuration before exiting
+    ConfigManager.save()
+    logger.info("Discord bot has been stopped.")
 
 
 if __name__ == "__main__":

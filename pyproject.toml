@@ -7,11 +7,14 @@ requires-python = ">=3.12"
 dependencies = [
     "better-exceptions>=0.3.3",
     "certifi>=2025.7.14",
+    "dateparser>=1.2.2",
     "discord>=2.3.2",
     "dotenv>=0.9.9",
+    "feedparser>=6.0.11",
     "loguru>=0.7.3",
     "peewee>=3.18.2",
     "pip-system-certs>=5.2",
+    "pygithub>=2.6.1",
     "requests>=2.32.4",
     "rich>=14.0.0",
 ]

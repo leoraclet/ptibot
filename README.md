@@ -30,6 +30,7 @@
 - [🚀 Run](#-run)
   - [🏠 System](#-system)
   - [🐳 Using Docker](#-using-docker)
+- [🔥 Inspirations](#-inspirations)
 - [💡 Tips \& Tricks](#-tips--tricks)
   - [SSL Certificates error](#ssl-certificates-error)
 - [📜 License](#-license)
@@ -182,6 +183,15 @@ make down    # Stop and remove containers and associated networks
 make build   # Build or rebuild the Docker services
 make logs    # View the output logs from running containers
 ```
+
+## 🔥 Inspirations
+
+These projects served as both inspiration and valuable references during the development of this one. Be sure to check them out if you're interested in learning more:
+
+- [**Deadbeef**](https://github.com/0xf1d0/deadbeef/) – A Discord bot created by a friend for a cybersecurity school server.
+- [**discord-reminder-bot**](https://github.com/TheLovinator1/discord-reminder-bot) – A bot for managing reminders and TODO tasks.
+- [**Python-Discord-Bot-Template**](https://github.com/kkrypt0nn/Python-Discord-Bot-Template) – A helpful template for setting up Discord bots with Python.
+
 
 ## 💡 Tips & Tricks
 
