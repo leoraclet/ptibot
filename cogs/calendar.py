@@ -6,7 +6,8 @@ import requests
 from discord.ext import commands, tasks
 from googleapiclient.discovery import build
 from loguru import logger
-from utils.config import (
+
+from config import (
     DAYS_IN_FUTURE,
     DISCORD_BOT_TOKEN,
     DISCORD_CHANNEL_ID,
@@ -202,3 +203,7 @@ class Calendar(commands.Cog, name="calendar"):
 
         except Exception as e:
             logger.error(f"Error in sync_events_loop: {e}")
+
+
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Calendar(bot))

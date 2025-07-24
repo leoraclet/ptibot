@@ -198,8 +198,8 @@ class Admin(commands.Cog, name="admin"):
         await context.send(embed=embed)
 
     @app_commands.command(description="Efface un nombre de messages.")
-    @app_commands.describe(message="The number of messages that should be deleted by the bot")
-    @app_commands.checks.has_permissions(manage_messages=True)
+    @app_commands.describe(limit="The number of messages that should be deleted by the bot")
+    @commands.is_owner()
     async def purge(self, interaction: Interaction, limit: int):
         await interaction.response.send_message(
             f"{limit} messages ont été effacés.", ephemeral=True
@@ -207,7 +207,6 @@ class Admin(commands.Cog, name="admin"):
         await interaction.channel.purge(limit=limit)
 
     @app_commands.command(description="Annoncer un message.")
-    @app_commands.describe(message="The message that should Announced by the bot")
     @commands.is_owner()
     async def announce(self, interaction: Interaction):
         modal = Announcement()
