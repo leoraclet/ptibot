@@ -56,9 +56,9 @@ Whether you're running a small community or developing a personal assistant, Pti
 
 - 🤖 **ChatBot**: Implement a Chat Bot functionality by using the Mistral API under the hood.
 
-  > [!WARNING]
-  >
-  > Following is a list of features I **wish** to implement, and therefore, are **not yet features**:
+> [!WARNING]
+>
+> Following is a list of features I **wish** to implement, and therefore, are **not yet features**:
 
 - ✅ **Task Management**: Implement functionality to manage tasks (create, delete, mark as completed, etc.).
 
