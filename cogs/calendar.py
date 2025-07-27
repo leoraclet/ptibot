@@ -132,7 +132,7 @@ class Calendar(commands.Cog, name="calendar"):
         self.synced_events = ConfigManager.get("synced_events", {"events": []})
 
         # Start the periodic synchronization loop
-        self.sync_events_loop.start()
+        #self.sync_events_loop.start()
 
     @tasks.loop(seconds=SYNC_INTERVAL)
     async def sync_events_loop(self):

@@ -2,7 +2,6 @@ import json
 import logging
 import os
 import platform
-import re
 import sys
 
 import discord
@@ -33,21 +32,18 @@ class InterceptHandler(logging.Handler):
             frame = frame.f_back  # type: ignore
             depth += 1
 
-        regex = re.compile(r"(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]")
-        logger.opt(depth=depth, exception=record.exc_info).log(
-            level, regex.sub("", record.getMessage()), colorize=False
-        )
+        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
 
 # Intercept standard logging
-logging.basicConfig(handlers=[InterceptHandler()], level=logging.INFO)
+logging.basicConfig(handlers=[InterceptHandler()], level=logging.DEBUG)
 
 # Configure Loguru logger
 logger.remove()  # Remove the default logger
-logger.add(sys.stdout, level="INFO", backtrace=True, diagnose=True)
+logger.add(sys.stdout, level="DEBUG", backtrace=True, diagnose=True)
 logger.add(
     "logs/discord_bot.log",
-    level="INFO",
+    level="DEBUG",
     rotation="30 MB",
     backtrace=True,
     diagnose=True,

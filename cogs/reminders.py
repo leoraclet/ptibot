@@ -6,8 +6,7 @@ from discord.ext import commands, tasks
 
 from config import CALENDAR_CHANNEL, ConfigManager
 
-# TODO: Handle Timezone issues
-# TODO: Add a way to set the timezone for the reminders
+# TODO: Handle Timezone for reminders
 
 
 class Reminders(commands.Cog, name="reminders"):
@@ -17,6 +16,42 @@ class Reminders(commands.Cog, name="reminders"):
 
         # Start the reminder check task
         self.check_reminders.start()
+
+    @app_commands.command(
+        name="timezone", description="Définir le fuseau horaire pour les rappels."
+    )
+    @app_commands.describe(timezone="Le fuseau horaire à définir pour les rappels.")
+    @app_commands.choices(
+        timezone=[
+            app_commands.Choice(name="Europe/Paris", value="Europe/Paris"),
+            app_commands.Choice(name="Europe/London", value="Europe/London"),
+            app_commands.Choice(name="Europe/Berlin", value="Europe/Berlin"),
+            app_commands.Choice(name="America/Los_Angeles", value="America/Los_Angeles"),
+            app_commands.Choice(name="America/Chicago", value="America/Chicago"),
+            app_commands.Choice(name="America/Denver", value="America/Denver"),
+            app_commands.Choice(name="America/Phoenix", value="America/Phoenix"),
+            app_commands.Choice(name="America/Denver", value="America/Denver"),
+            app_commands.Choice(name="America/Los_Angeles", value="America/Los_Angeles"),
+            app_commands.Choice(name="Canada/Eastern", value="Canada/Eastern"),
+            app_commands.Choice(name="Canada/Central", value="Canada/Central"),
+            app_commands.Choice(name="Canada/Mountain", value="Canada/Mountain"),
+            app_commands.Choice(name="Canada/Pacific", value="Canada/Pacific"),
+            app_commands.Choice(name="America/New_York", value="America/New_York"),
+            app_commands.Choice(name="Asia/Tokyo", value="Asia/Tokyo"),
+            app_commands.Choice(name="UTC", value="UTC"),
+            app_commands.Choice(name="Other", value="Other"),
+        ]
+    )
+    async def timezone_command(self, interaction: Interaction, timezone: str):
+        """
+        Set the timezone for the reminders.
+        This is a placeholder function and should be implemented.
+        """
+
+        ConfigManager.set("reminder_timezone", timezone)
+        await interaction.response.send_message(
+            f"Fuseau horaire pour les rappels défini sur {timezone}.", ephemeral=True
+        )
 
     async def course_autocomplete(
         self, _: Interaction, current: str

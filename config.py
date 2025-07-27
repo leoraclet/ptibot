@@ -21,6 +21,8 @@ CALENDAR_CHANNEL = Object(1058816788328091810, type=TextChannel)
 LOGS_CHANNEL = Object(1397918688249905273, type=TextChannel)
 GITHUB_CHANNEL = Object(1397931684720279624, type=TextChannel)
 EVENTS_CHANNEL = Object(1398033188454138127, type=VoiceChannel)
+TOOLS_CHANNEL = Object(1398205767827460148, type=TextChannel)
+TODO_CHANNEL = Object(1398338757110927401, type=TextChannel)
 
 # ============================================ #
 # DISCORD BOT CONFIGURATION
@@ -47,7 +49,7 @@ MAIN_COLOR = 0x476EFC
 
 
 class ConfigManager:
-    path = "config.json"
+    path = "db/config.json"
     config = {}
 
     @classmethod

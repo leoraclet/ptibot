@@ -56,13 +56,19 @@ Whether you're running a small community or developing a personal assistant, Pti
 
 - 🤖 **ChatBot**: Implement a Chat Bot functionality by using the Mistral API under the hood.
 
+- 🛠️ **Tools**: Develop functionality to manage tasks (create, delete, edit) and group them by category.
+
+- 📰 **News**: Implement a News feed that follows popular RSS feeds, and notify of new posts.
+
+- ✅ **Task Management**: Implement functionality to manage tasks (create, delete, mark as completed).
+
 > [!WARNING]
 >
 > Following is a list of features I **wish** to implement, and therefore, are **not yet features**:
 
-- ✅ **Task Management**: Implement functionality to manage tasks (create, delete, mark as completed, etc.).
+- 📹 **Youtube Tracker**: Implement a tracker to alert of new videos choosed youtube channels.
 
-- 👣 **Github Tracking**: Develop a tracker to alert of events on repositories of connected account.
+- 👣 **Github Tracker**: Develop a tracker to alert of events on repositories of connected account.
 
 ## 🗂️ Structure
 

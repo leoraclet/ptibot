@@ -113,7 +113,7 @@ class Common(commands.Cog, name="common"):
         )
         await context.send(embed=embed)
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(minutes=2)
     async def update_status(self) -> None:
         """Update the bot's status."""
         guild = self.bot.get_guild(829032123301494834)

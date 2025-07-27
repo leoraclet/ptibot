@@ -32,11 +32,10 @@ class Mistral(commands.Cog, name="mistral"):
     @logger.catch
     @commands.Cog.listener()
     async def on_message(self, message: Message):
-        logger.info(f"Received message: {message.content} from {message.author}")
         if message.author.bot:
             return
 
-        logger.info(f"Processing message in channel {message.channel.id}")
+        logger.debug(f"Processing message in channel {message.channel.id} from {message.author}.")
         channel_id = message.channel.id
         ref = message.reference
         replied_message = None
@@ -77,14 +76,14 @@ class Mistral(commands.Cog, name="mistral"):
                             stream=False,
                         )
                         answer = re.sub(
-                            r"<@&?\d+>|@everyone|@here", "X", answer.choices[0].message.content
+                            r"<@&?\d+>", "X", answer.choices[0].message.content
                         )
                     conversation.append({"role": "assistant", "content": answer})
                     for part in divide_msg(answer):
                         await message.reply(part)
                 except Exception as e:
-                    raise e
                     await message.reply(str(e))
+                    raise e
             return
 
 
